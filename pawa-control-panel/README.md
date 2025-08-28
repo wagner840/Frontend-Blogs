@@ -7,7 +7,6 @@ A comprehensive SEO and content management dashboard built with Next.js 14, inte
 - **📊 Keywords Management**: Advanced data table with filtering, sorting, and pagination
 - **📝 Content Synchronization**: Real-time WordPress webhook integration
 - **📈 Google Analytics**: OAuth2 integration with comprehensive reporting
-- **🔄 Production Pipeline**: Kanban board for content workflow management
 - **🔐 Secure Authentication**: Google OAuth2 with PKCE security
 - **💾 Supabase Integration**: Real-time database with RLS policies
 
@@ -78,8 +77,7 @@ src/
 │   ├── (dashboard)/       # Dashboard route group
 │   │   ├── keywords/      # Keywords management
 │   │   ├── content/       # Content management
-│   │   ├── analytics/     # Analytics dashboard
-│   │   └── pipeline/      # Production pipeline
+│   │   └── analytics/     # Analytics dashboard
 │   └── api/               # API routes
 │       ├── sync/          # WordPress sync endpoints
 │       ├── auth/          # OAuth2 endpoints

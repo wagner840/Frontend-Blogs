@@ -116,9 +116,9 @@ export default function DashboardPage(): ReactElement {
                 </div>
               </button>
               <button className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted transition-colors">
-                <div className="font-medium">Content Pipeline</div>
+                <div className="font-medium">Manage Content</div>
                 <div className="text-sm text-muted-foreground">
-                  Manage content production workflow
+                  View and organize your content library
                 </div>
               </button>
               <button className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted transition-colors">

@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils'
 import { 
   BarChart3, 
   FileText, 
-  Kanban, 
   Search,
   Home
 } from 'lucide-react'
@@ -27,11 +26,6 @@ const navigation = [
     name: 'Content',
     href: '/content',
     icon: FileText
-  },
-  {
-    name: 'Pipeline',
-    href: '/pipeline',
-    icon: Kanban
   },
   {
     name: 'Analytics',

@@ -50,7 +50,10 @@ export function KeywordVariationsTable({ mainKeywordId, initialData, totalCount 
 
     const { data, count, error } = await supabase
       .from('keyword_variations')
-      .select('*', { count: 'exact' })
+      .select(`
+        id, keyword, variation_type, msv, kw_difficulty, cpc, 
+        competition, search_intent, answer
+      `, { count: 'exact' })
       .eq('main_keyword_id', mainKeywordId)
       .order('msv', { ascending: false })
       .range(from, to)
@@ -73,12 +76,16 @@ export function KeywordVariationsTable({ mainKeywordId, initialData, totalCount 
     setVariations(initialData)
     setTotal(totalCount)
     setPage(1)
+    setExpanded(false) // Reset expanded state when keyword changes
   }, [initialData, totalCount, mainKeywordId])
 
-  const loadMore = () => {
+  const loadMore = async () => {
+    if (loading) return // Prevent multiple simultaneous requests
+    
     const nextPage = page + 1
+    console.log('Loading page:', nextPage, 'Total:', total, 'Current count:', variations.length)
     setPage(nextPage)
-    fetchVariations(nextPage)
+    await fetchVariations(nextPage)
   }
 
   const hasMore = variations.length < total

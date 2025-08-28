@@ -45,18 +45,3 @@ export interface ContentPost {
   }
 }
 
-export interface ProductionPipeline {
-  id: number | null
-  post_slug: string | null
-  post_title: string | null
-  current_stage: string | null
-  assigned_to: string | null
-  due_date: string | null
-  priority: string | null
-  notes: string | null
-  created_at: string | null
-  updated_at: string | null
-  blog_name: string | null
-  stage_order: number | null
-  days_in_stage: number | null
-}
