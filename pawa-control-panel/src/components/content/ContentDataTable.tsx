@@ -60,7 +60,7 @@ export function ContentDataTable({
     const params = new URLSearchParams(searchParams.toString())
     
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === '') {
+      if (value === null || value === '' || value === 'all') {
         params.delete(key)
       } else {
         params.set(key, value)
@@ -307,14 +307,14 @@ export function ContentDataTable({
         
         <div className="flex items-center space-x-4">
           <Select
-            value={searchParams.get('status') || ''}
+            value={searchParams.get('status') || 'all'}
             onValueChange={(value) => updateUrl({ status: value })}
           >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Status</SelectItem>
+              <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="publish">Published</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="private">Private</SelectItem>
