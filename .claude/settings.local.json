@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp add:*)",
+      "mcp__archon__health_check",
+      "mcp__archon__get_available_sources",
+      "mcp__archon__perform_rag_query",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "mcp__archon__manage_project",
+      "mcp__supabase__execute_sql",
+      "mcp__archon__manage_task",
+      "WebSearch",
+      "mcp__archon__search_code_examples",
+      "mcp__supabase__search_docs",
+      "Read(E:\\front-blogs/**)",
+      "Bash(npx create-next-app:*)",
+      "Read(E:\\front-blogs\\pawa-control-panel/**)",
+      "Read(E:\\e\\front-blogs/**)",
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "mcp__supabase__apply_migration",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_network_requests",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_snapshot",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "E:\\front-blogs",
+      "E:\\e\\front-blogs\\Frontend-Blogs"
+    ]
+  }
+}
