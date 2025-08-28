@@ -48,6 +48,12 @@ export function KeywordVariationsTable({ mainKeywordId, initialData, totalCount 
     const from = (pageNum - 1) * perPage
     const to = from + perPage - 1
 
+    // Don't request data if we already have all records
+    if (pageNum > 1 && variations.length >= total) {
+      setLoading(false)
+      return
+    }
+
     const { data, count, error } = await supabase
       .from('keyword_variations')
       .select(`
@@ -60,6 +66,10 @@ export function KeywordVariationsTable({ mainKeywordId, initialData, totalCount 
 
     if (error) {
       console.error('Error fetching variations:', error)
+      // Reset to previous page on error
+      if (pageNum > 1) {
+        setPage(prev => prev - 1)
+      }
     } else {
       if (pageNum === 1) {
         setVariations(data || [])
@@ -88,7 +98,7 @@ export function KeywordVariationsTable({ mainKeywordId, initialData, totalCount 
     await fetchVariations(nextPage)
   }
 
-  const hasMore = variations.length < total
+  const hasMore = variations.length < total && total > 0
 
   return (
     <Card>

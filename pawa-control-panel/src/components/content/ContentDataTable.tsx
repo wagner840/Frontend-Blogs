@@ -39,18 +39,26 @@ import {
 } from 'lucide-react'
 import type { ContentPost } from '@/types'
 
+interface Blog {
+  id: string
+  name: string
+  domain: string
+}
+
 interface ContentDataTableProps {
   data: ContentPost[]
   total: number
   page: number
   perPage: number
+  blogs: Blog[]
 }
 
 export function ContentDataTable({ 
   data, 
   total, 
   page, 
-  perPage 
+  perPage,
+  blogs
 }: ContentDataTableProps): ReactElement {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -100,18 +108,18 @@ export function ContentDataTable({
         const blog = row.original.blogs as { name: string; domain: string } | undefined
         
         return (
-          <div className="space-y-1">
-            <div className="font-medium text-sm line-clamp-2 max-w-xs">
+          <div className="space-y-1 min-w-0">
+            <div className="font-medium text-sm line-clamp-2 max-w-xs lg:max-w-sm xl:max-w-md">
               {title}
             </div>
             {slug && (
-              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <span className="truncate max-w-48">{slug}</span>
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground min-w-0">
+                <span className="truncate max-w-32 sm:max-w-48 lg:max-w-64">{slug}</span>
                 <a
                   href={`https://${blog?.domain}/${slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-700"
+                  className="text-blue-500 hover:text-blue-700 flex-shrink-0"
                 >
                   <ExternalLink className="h-3 w-3" />
                 </a>
@@ -150,7 +158,7 @@ export function ContentDataTable({
       header: 'Status',
       cell: ({ row }) => {
         const status = row.getValue('status') as string
-        const variant = status === 'publish' ? 'default' : 
+        const variant = status === 'published' ? 'default' : 
                       status === 'draft' ? 'secondary' : 
                       status === 'private' ? 'outline' : 'destructive'
         return (
@@ -279,10 +287,12 @@ export function ContentDataTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Content Posts ({total.toLocaleString()})</span>
-          <div className="flex items-center space-x-2">
-            <div className="relative">
+        <CardTitle className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-fluid-lg font-bold">Content Posts ({total.toLocaleString()})</span>
+          
+          {/* Search Section - Responsive */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
+            <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search posts..."
@@ -293,113 +303,140 @@ export function ContentDataTable({
                     updateUrl({ search: globalFilter })
                   }
                 }}
-                className="pl-8 w-64"
+                className="pl-8 w-full sm:w-64"
               />
             </div>
             <Button
               onClick={() => updateUrl({ search: globalFilter })}
               size="sm"
+              className="w-full sm:w-auto"
             >
               Search
             </Button>
           </div>
         </CardTitle>
         
-        <div className="flex items-center space-x-4">
-          <Select
-            value={searchParams.get('status') || 'all'}
-            onValueChange={(value) => updateUrl({ status: value })}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="publish">Published</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="private">Private</SelectItem>
-              <SelectItem value="trash">Trash</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filters Section - Responsive Grid */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 flex-1">
+            <Select
+              value={searchParams.get('blog_id') || 'all'}
+              onValueChange={(value) => updateUrl({ blog_id: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="All Blogs" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Blogs</SelectItem>
+                {blogs.map((blog) => (
+                  <SelectItem key={blog.id} value={blog.id}>
+                    {blog.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.refresh()}
-          >
-            Refresh
-          </Button>
+            <Select
+              value={searchParams.get('status') || 'all'}
+              onValueChange={(value) => updateUrl({ status: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="private">Private</SelectItem>
+                <SelectItem value="trash">Trash</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.refresh()}
+              className="w-full lg:w-auto"
+            >
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
       <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+        {/* Responsive Table Container */}
+        <div className="table-responsive">
+          <div className="rounded-md border min-w-full">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} className="whitespace-nowrap">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No content posts found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="whitespace-nowrap">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No content posts found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="text-sm text-muted-foreground">
+        {/* Responsive Pagination */}
+        <div className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-muted-foreground text-center sm:text-left">
             Showing {startItem}-{endItem} of {total.toLocaleString()} posts
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center gap-2 sm:justify-end">
             <Button
               variant="outline"
               size="sm"
               onClick={() => updateUrl({ page: (page - 1).toString() })}
               disabled={page <= 1}
+              className="flex-1 sm:flex-initial"
             >
               <ChevronLeft className="h-4 w-4" />
-              Previous
+              <span className="hidden xs:inline ml-1">Previous</span>
             </Button>
             
-            <div className="text-sm">
-              Page {page} of {totalPages}
+            <div className="px-2 py-1 text-sm whitespace-nowrap">
+              {page} of {totalPages}
             </div>
             
             <Button
@@ -407,8 +444,9 @@ export function ContentDataTable({
               size="sm"
               onClick={() => updateUrl({ page: (page + 1).toString() })}
               disabled={page >= totalPages}
+              className="flex-1 sm:flex-initial"
             >
-              Next
+              <span className="hidden xs:inline mr-1">Next</span>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

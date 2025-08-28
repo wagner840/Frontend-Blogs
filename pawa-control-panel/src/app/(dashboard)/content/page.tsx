@@ -1,6 +1,6 @@
 import { ReactElement } from 'react'
 import { ContentDataTable } from '@/components/content/ContentDataTable'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import type { ContentPost } from '@/types'
 
 interface SearchParams {
@@ -18,7 +18,7 @@ interface ContentPageProps {
 }
 
 async function getContentPosts(searchParams: SearchParams) {
-  const supabase = createClient()
+  const supabase = createServiceClient()
   
   const page = parseInt(searchParams.page || '1')
   const perPage = parseInt(searchParams.per_page || '50')
@@ -29,8 +29,8 @@ async function getContentPosts(searchParams: SearchParams) {
     .from('content_posts')
     .select(`
       *,
-      blogs!inner(name, domain),
-      authors!inner(name, email)
+      blogs(id, name, domain),
+      authors(name, email)
     `, { count: 'exact' })
 
   // Global search
@@ -76,8 +76,27 @@ async function getContentPosts(searchParams: SearchParams) {
   }
 }
 
+async function getBlogs() {
+  const supabase = createServiceClient()
+  
+  const { data, error } = await supabase
+    .from('blogs')
+    .select('id, name, domain')
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching blogs:', error)
+    return []
+  }
+
+  return data || []
+}
+
 export default async function ContentPage({ searchParams }: ContentPageProps): Promise<ReactElement> {
-  const { data, total, page, perPage } = await getContentPosts(searchParams)
+  const [{ data, total, page, perPage }, blogs] = await Promise.all([
+    getContentPosts(searchParams),
+    getBlogs()
+  ])
 
   return (
     <div className="space-y-6">
@@ -93,6 +112,7 @@ export default async function ContentPage({ searchParams }: ContentPageProps): P
         total={total}
         page={page}
         perPage={perPage}
+        blogs={blogs}
       />
     </div>
   )
