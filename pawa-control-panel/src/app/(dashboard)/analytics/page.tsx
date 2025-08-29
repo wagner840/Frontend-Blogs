@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactElement, useState, useEffect } from 'react'
+import { ReactElement, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
@@ -34,6 +34,7 @@ interface BlogData {
     title: string
     slug: string
     views: number
+    blog?: string
   }>
   trafficSources: Array<{
     name: string
@@ -41,7 +42,7 @@ interface BlogData {
     color: string
   }>
   keywords: Array<{
-    keyword: string
+    term: string
     position: number
     clicks: number
   }>
@@ -73,9 +74,9 @@ export default function AnalyticsPage(): ReactElement {
         { name: 'Referral', percentage: 3.7, color: 'bg-purple-500' }
       ],
       keywords: [
-        { keyword: 'ozempic', position: 3, clicks: 2543 },
-        { keyword: 'calistenia', position: 5, clicks: 1892 },
-        { keyword: 'tdah sintomas', position: 4, clicks: 1634 }
+        { term: 'ozempic', position: 3, clicks: 2543 },
+        { term: 'calistenia', position: 5, clicks: 1892 },
+        { term: 'tdah sintomas', position: 4, clicks: 1634 }
       ]
     },
     'einsof7': {
@@ -99,9 +100,9 @@ export default function AnalyticsPage(): ReactElement {
         { name: 'Referral', percentage: 6.3, color: 'bg-purple-500' }
       ],
       keywords: [
-        { keyword: 'android tv', position: 7, clicks: 1234 },
-        { keyword: 'netflix filmes', position: 2, clicks: 2143 },
-        { keyword: 'chromecast', position: 6, clicks: 987 }
+        { term: 'android tv', position: 7, clicks: 1234 },
+        { term: 'netflix filmes', position: 2, clicks: 2143 },
+        { term: 'chromecast', position: 6, clicks: 987 }
       ]
     }
   }
@@ -117,9 +118,9 @@ export default function AnalyticsPage(): ReactElement {
     bounceRate: 42.1,
     growth: 20.1,
     topPages: [
-      { title: 'Ozempic: Como Funciona para Emagrecer', slug: '/ozempic-emagrecer', views: 8543 },
-      { title: 'Melhores Filmes Netflix 2024', slug: '/melhores-filmes-netflix', views: 6221 },
-      { title: 'Calistenia para Iniciantes', slug: '/calistenia-iniciantes', views: 4892 }
+      { title: 'Ozempic: Como Funciona para Emagrecer', slug: '/ozempic-emagrecer', views: 8543, blog: 'Optemil' },
+      { title: 'Melhores Filmes Netflix 2024', slug: '/melhores-filmes-netflix', views: 6221, blog: 'Einsof7' },
+      { title: 'Calistenia para Iniciantes', slug: '/calistenia-iniciantes', views: 4892, blog: 'Optemil' }
     ],
     trafficSources: [
       { name: 'Organic Search', percentage: 68.2, color: 'bg-blue-500' },
@@ -128,9 +129,9 @@ export default function AnalyticsPage(): ReactElement {
       { name: 'Referral', percentage: 5.0, color: 'bg-purple-500' }
     ],
     keywords: [
-      { keyword: 'ozempic', position: 3, clicks: 2543 },
-      { keyword: 'netflix filmes', position: 2, clicks: 2143 },
-      { keyword: 'calistenia', position: 5, clicks: 1892 }
+      { term: 'ozempic', position: 3, clicks: 2543 },
+      { term: 'netflix filmes', position: 2, clicks: 2143 },
+      { term: 'calistenia', position: 5, clicks: 1892 }
     ]
   }
 
@@ -307,7 +308,7 @@ export default function AnalyticsPage(): ReactElement {
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="font-medium text-sm">{page.title}</p>
-                    <p className="text-xs text-muted-foreground">{page.path}</p>
+                    <p className="text-xs text-muted-foreground">{page.slug}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">{page.views.toLocaleString()}</p>
