@@ -3,8 +3,8 @@ import { getGAAuth } from './auth'
 
 export class GoogleAnalyticsClient {
   private static instance: GoogleAnalyticsClient
-  private analytics: any = null
-  private analyticsReporting: any = null
+  private analytics: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
+  private analyticsReporting: any = null // eslint-disable-line @typescript-eslint/no-explicit-any
 
   private constructor() {}
 
@@ -56,7 +56,7 @@ export class GoogleAnalyticsClient {
   }
 
   // Generic batch get method for reports
-  async batchGetReports(requests: any[]) {
+  async batchGetReports(requests: any[]) { // eslint-disable-line @typescript-eslint/no-explicit-any
     try {
       const reporting = await this.getReportingClient()
       const response = await reporting.reports.batchGet({

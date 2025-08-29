@@ -1,6 +1,6 @@
 // Google Analytics API Configuration
 export interface GAConfig {
-  credentials: any
+  credentials: any // eslint-disable-line @typescript-eslint/no-explicit-any
   scopes: string[]
   properties: {
     optemil: string

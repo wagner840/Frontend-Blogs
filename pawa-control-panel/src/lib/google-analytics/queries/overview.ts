@@ -78,7 +78,7 @@ export async function getOverviewMetrics(
     const bounceRate = parseFloat(currentValues[4])
 
     const previousUsers = parseInt(previousValues[0])
-    const previousPageViews = parseInt(previousValues[1])
+    // const previousPageViews = parseInt(previousValues[1]) // Currently unused
 
     return {
       users: currentUsers,

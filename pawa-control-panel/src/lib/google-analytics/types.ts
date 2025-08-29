@@ -18,7 +18,7 @@ export interface GAReportRequest {
   dateRanges: DateRange[]
   metrics: GAMetric[]
   dimensions?: GADimension[]
-  orderBys?: any[]
+  orderBys?: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   pageSize?: number
 }
 
