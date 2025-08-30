@@ -51,6 +51,7 @@ export interface Keyword {
   position: number
   clicks: number
   impressions: number
+  ctr?: number // Click-through rate as percentage
 }
 
 export interface BlogAnalyticsData {

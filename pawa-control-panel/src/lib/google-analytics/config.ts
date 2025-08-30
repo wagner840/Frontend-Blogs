@@ -15,7 +15,9 @@ export const GA_CONFIG: GAConfig = {
   
   scopes: [
     'https://www.googleapis.com/auth/analytics.readonly',
-    'https://www.googleapis.com/auth/analytics'
+    'https://www.googleapis.com/auth/analytics',
+    'https://www.googleapis.com/auth/webmasters.readonly',
+    'https://www.googleapis.com/auth/webmasters'
   ],
   
   properties: {
@@ -43,8 +45,18 @@ export function getAllPropertyIds(): string[] {
 
 // Validate configuration
 export function validateGAConfig(): boolean {
+  console.log('Validating GA Config...')
+  
   if (!GA_CONFIG.credentials) {
-    console.error('Google Service Account credentials not found')
+    console.error('Google Service Account credentials not found in environment variables')
+    return false
+  }
+
+  // Check if credentials look like a service account (has type: "service_account")
+  if (GA_CONFIG.credentials?.web) {
+    console.error('❌ OAuth2 Web Client credentials detected - Service Account required for Analytics API')
+    console.log('📝 You provided OAuth2 Web Client credentials, but we need Service Account credentials.')
+    console.log('🔧 Please create a Service Account in Google Cloud Console and download the JSON key')
     return false
   }
 
@@ -53,5 +65,6 @@ export function validateGAConfig(): boolean {
     return false
   }
 
+  console.log('✅ GA Config validation passed')
   return true
 }
