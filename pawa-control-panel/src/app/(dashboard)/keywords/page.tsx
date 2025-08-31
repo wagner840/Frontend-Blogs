@@ -82,7 +82,7 @@ export default async function KeywordsPage({ searchParams }: KeywordsPageProps):
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Keywords</h1>
+        <h1 className="text-fluid-xl font-bold text-foreground">Keywords</h1>
         <p className="text-muted-foreground">
           Manage and analyze keyword opportunities across your blog network
         </p>

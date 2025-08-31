@@ -167,7 +167,7 @@ export default function AnalyticsPage(): ReactElement {
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <Select value={selectedBlog} onValueChange={setSelectedBlog}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="Selecionar Blog" />
             </SelectTrigger>
             <SelectContent>
@@ -180,7 +180,7 @@ export default function AnalyticsPage(): ReactElement {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid-fluid gap-fluid">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -243,7 +243,7 @@ export default function AnalyticsPage(): ReactElement {
       </div>
 
       {/* Blog Performance Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid-fluid gap-fluid">
         {selectedBlog === 'all' ? (
           <Card>
             <CardHeader>
@@ -342,7 +342,7 @@ export default function AnalyticsPage(): ReactElement {
       </div>
 
       {/* Traffic Sources & Keywords */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid-fluid gap-fluid">
         <Card>
           <CardHeader>
             <CardTitle>Traffic Sources</CardTitle>

@@ -275,9 +275,9 @@ export function KeywordsDataTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
           <span>Keywords ({total.toLocaleString()})</span>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:space-x-2 sm:space-y-0">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -289,24 +289,25 @@ export function KeywordsDataTable({
                     updateUrl({ search: globalFilter })
                   }
                 }}
-                className="pl-8 w-64"
+                className="pl-8 w-full sm:w-64"
               />
             </div>
             <Button
               onClick={() => updateUrl({ search: globalFilter })}
               size="sm"
+              className="w-full sm:w-auto"
             >
               Search
             </Button>
           </div>
         </CardTitle>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
           <Select
             value={searchParams.get('blog_name') || 'all'}
             onValueChange={(value) => updateUrl({ blog_name: value })}
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="All Blogs" />
             </SelectTrigger>
             <SelectContent>
@@ -320,7 +321,7 @@ export function KeywordsDataTable({
             value={searchParams.get('search_intent') || 'all'}
             onValueChange={(value) => updateUrl({ search_intent: value })}
           >
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="All Intents" />
             </SelectTrigger>
             <SelectContent>
@@ -336,7 +337,7 @@ export function KeywordsDataTable({
             value={searchParams.get('competition') || 'all'}
             onValueChange={(value) => updateUrl({ competition: value })}
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue placeholder="Competition" />
             </SelectTrigger>
             <SelectContent>
@@ -351,7 +352,7 @@ export function KeywordsDataTable({
             value={searchParams.get('is_used') || 'all'}
             onValueChange={(value) => updateUrl({ is_used: value })}
           >
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -372,7 +373,7 @@ export function KeywordsDataTable({
       </CardHeader>
 
       <CardContent>
-        <div className="rounded-md border">
+        <div className="table-responsive">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
