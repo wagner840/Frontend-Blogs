@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { validateGAConfig } from '@/lib/google-analytics/config'
+import { validateGAConfig, GA_CONFIG } from '@/lib/google-analytics/config'
 import { getGAAuth } from '@/lib/google-analytics/auth'
-import { getGAClient } from '@/lib/google-analytics/client'
+import { getGA4Client } from '@/lib/google-analytics/ga4-client'
 
 export async function GET() {
   try {
@@ -23,7 +23,8 @@ export async function GET() {
         canConnect: false,
         error: null as string | null
       },
-      overall: 'unknown' as 'healthy' | 'degraded' | 'unhealthy' | 'unknown'
+      overall: 'unknown' as 'healthy' | 'degraded' | 'unhealthy' | 'unknown',
+      buildTime: process.env.NODE_ENV === 'development' ? false : true
     }
 
     // Check configuration
@@ -31,6 +32,14 @@ export async function GET() {
 
     if (!status.configuration.configValid) {
       status.overall = 'unhealthy'
+      return NextResponse.json(status)
+    }
+
+    // Skip API calls during build time to prevent static generation failures
+    if (status.buildTime) {
+      status.overall = 'degraded'
+      status.authentication.error = 'Skipped during build time'
+      status.client.error = 'Skipped during build time'
       return NextResponse.json(status)
     }
 
@@ -45,21 +54,21 @@ export async function GET() {
       status.authentication.error = authError instanceof Error ? authError.message : 'Authentication failed'
     }
 
-    // Test client initialization
+    // Test GA4 client initialization
     try {
-      const client = getGAClient()
-      await client.initialize()
+      const ga4Client = getGA4Client()
+      await ga4Client.initialize()
       status.client.canInitialize = true
       
-      // Test actual connection (this might fail if properties don't exist)
+      // Test actual connection using GA4 API (test with primary property)
       try {
-        const connectionTest = await client.testConnection()
+        const connectionTest = await ga4Client.testConnection(GA_CONFIG.properties.optemil)
         status.client.canConnect = connectionTest
       } catch (connectionError) {
-        status.client.error = connectionError instanceof Error ? connectionError.message : 'Connection test failed'
+        status.client.error = connectionError instanceof Error ? connectionError.message : 'GA4 connection test failed'
       }
     } catch (clientError) {
-      status.client.error = clientError instanceof Error ? clientError.message : 'Client initialization failed'
+      status.client.error = clientError instanceof Error ? clientError.message : 'GA4 client initialization failed'
     }
 
     // Determine overall status
