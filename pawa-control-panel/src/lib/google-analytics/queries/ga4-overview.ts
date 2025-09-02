@@ -14,58 +14,91 @@ function calculateGrowth(current: number, previous: number): number {
   return Number(((current - previous) / previous * 100).toFixed(1))
 }
 
-// Get overview metrics for GA4 property
+// Get overview metrics for GA4 property with fallback date ranges
 export async function getGA4OverviewMetrics(
   propertyId: string,
-  dateRange: DateRange = { startDate: '30daysAgo', endDate: 'yesterday' }
+  dateRange: DateRange = { startDate: '7daysAgo', endDate: 'yesterday' }
 ): Promise<AnalyticsOverview> {
   try {
     const client = await getGA4Client().getClient()
     
-    // Current period request
-    const [currentResponse] = await client.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [
-        {
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate,
-        },
-      ],
-      metrics: [
-        { name: 'totalUsers' },
-        { name: 'screenPageViews' },
-        { name: 'sessions' },
-        { name: 'averageSessionDuration' },
-        { name: 'bounceRate' },
-      ],
-    })
+    // Define fallback date ranges in order of preference
+    const fallbackRanges = [
+      dateRange, // Original requested range
+      { startDate: '30daysAgo', endDate: 'yesterday' }, // Last 30 days
+      { startDate: '90daysAgo', endDate: 'yesterday' }, // Last 90 days
+      { startDate: '365daysAgo', endDate: '30daysAgo' }, // 1 year ago to 30 days ago
+      { startDate: '2024-01-01', endDate: '2024-12-31' }, // All of 2024
+      { startDate: '2023-01-01', endDate: '2023-12-31' }, // All of 2023
+    ]
 
-    // Previous period for comparison (same length as current period)
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - 60) // 60 days ago
-    const endDate = new Date()
-    endDate.setDate(endDate.getDate() - 31) // 31 days ago
+    let currentResponse: any = null
+    let usedRange: DateRange = dateRange
 
-    const [previousResponse] = await client.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [
-        {
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
-        },
-      ],
-      metrics: [
-        { name: 'totalUsers' },
-        { name: 'screenPageViews' },
-      ],
-    })
+    // Try each date range until we find data
+    for (const range of fallbackRanges) {
+      try {
+        console.log(`🔍 Trying date range: ${range.startDate} to ${range.endDate}`)
+        
+        const [response] = await client.runReport({
+          property: `properties/${propertyId}`,
+          dateRanges: [range],
+          metrics: [
+            { name: 'totalUsers' },
+            { name: 'screenPageViews' },
+            { name: 'sessions' },
+            { name: 'averageSessionDuration' },
+            { name: 'bounceRate' },
+          ],
+        })
 
-    // Extract current data
-    const currentRow = currentResponse.rows?.[0]
-    if (!currentRow?.metricValues) {
-      throw new Error('No data returned from GA4')
+        if (response.rows && response.rows.length > 0 && response.rows[0]?.metricValues) {
+          console.log(`✅ Found data in range: ${range.startDate} to ${range.endDate}`)
+          currentResponse = response
+          usedRange = range
+          break
+        } else {
+          console.log(`❌ No data in range: ${range.startDate} to ${range.endDate}`)
+        }
+      } catch (error) {
+        console.log(`❌ Error in range ${range.startDate} to ${range.endDate}:`, error)
+        continue
+      }
     }
 
+    // If no data found in any range, throw error
+    if (!currentResponse?.rows?.[0]?.metricValues) {
+      throw new Error(`No data returned from GA4 for property ${propertyId} in any date range. Check if analytics is properly configured and receiving data.`)
+    }
+
+    // Try to get previous period for comparison
+    let previousResponse: any = null
+    try {
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - 60) // 60 days ago
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() - 31) // 31 days ago
+
+      const [response] = await client.runReport({
+        property: `properties/${propertyId}`,
+        dateRanges: [
+          {
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0],
+          },
+        ],
+        metrics: [
+          { name: 'totalUsers' },
+          { name: 'screenPageViews' },
+        ],
+      })
+      previousResponse = response
+    } catch (error) {
+      console.warn('Could not fetch previous period data for comparison:', error)
+    }
+
+    // Extract current data
+    const currentRow = currentResponse.rows[0]
     const currentUsers = parseInt(currentRow.metricValues[0].value || '0')
     const currentPageViews = parseInt(currentRow.metricValues[1].value || '0')
     const currentSessions = parseInt(currentRow.metricValues[2].value || '0')
@@ -73,9 +106,10 @@ export async function getGA4OverviewMetrics(
     const bounceRate = parseFloat(currentRow.metricValues[4].value || '0') * 100 // GA4 returns as decimal
 
     // Extract previous data for comparison
-    const previousRow = previousResponse.rows?.[0]
+    const previousRow = previousResponse?.rows?.[0]
     const previousUsers = parseInt(previousRow?.metricValues?.[0]?.value || '0')
 
+    // Return the formatted data
     return {
       users: currentUsers,
       pageViews: currentPageViews,
@@ -84,19 +118,12 @@ export async function getGA4OverviewMetrics(
       bounceRate: Math.round(bounceRate * 10) / 10, // Round to 1 decimal
       growth: calculateGrowth(currentUsers, previousUsers)
     }
-
+    
   } catch (error) {
     console.error('Error fetching GA4 overview metrics:', error)
     
-    // Fallback to mock data if API fails
-    return {
-      users: 0,
-      pageViews: 0,
-      sessions: 0,
-      avgSessionDuration: '0:00',
-      bounceRate: 0,
-      growth: 0
-    }
+    // Re-throw the error so it can be handled by the fallback system
+    throw error
   }
 }
 
