@@ -1,5 +1,7 @@
-import { getSearchConsoleClient } from '../client'
+import { getSearchConsoleClient } from '@/lib/search-console/client'
 import { DateRange } from '@/lib/google-analytics/types'
+import { google } from 'googleapis'
+import { getGAAuth } from '@/lib/google-analytics/auth'
 
 export interface KeywordPerformance {
   query: string
@@ -59,7 +61,8 @@ export async function getKeywordsByBlog(
       limit
     )
 
-    return data.queries.map(query => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return data.queries.map((query: any) => ({
       query: query.query,
       clicks: query.clicks,
       impressions: query.impressions,
@@ -92,7 +95,8 @@ export async function getPagesByBlog(
       limit
     )
 
-    return data.pages.map(page => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return data.pages.map((page: any) => ({
       page: page.page,
       clicks: page.clicks,
       impressions: page.impressions,
@@ -124,7 +128,8 @@ export async function getDeviceBreakdown(
       10
     )
 
-    return data.devices.map(device => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return data.devices.map((device: any) => ({
       device: device.device,
       clicks: device.clicks,
       impressions: device.impressions,
@@ -156,7 +161,8 @@ export async function getCountryBreakdown(
       limit
     )
 
-    return data.countries.map(country => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return data.countries.map((country: any) => ({
       country: country.country,
       clicks: country.clicks,
       impressions: country.impressions,
@@ -178,7 +184,7 @@ export async function getTopQueriesForPage(
 ): Promise<KeywordPerformance[]> {
   try {
     const siteUrl = BLOG_DOMAINS[blogId]
-    const client = getSearchConsoleClient()
+    // const client = getSearchConsoleClient() // Not used in this implementation
     
     console.log(`🔍 Fetching queries for page: ${pageUrl}`)
     
@@ -205,13 +211,13 @@ export async function getTopQueriesForPage(
     }
     
     // Use Search Console client directly (we need to access webmasters property)
-    const { google } = require('googleapis')
-    const { getGAAuth } = require('@/lib/google-analytics/auth')
     
     const auth = getGAAuth()
+    const authClient = await auth.getClient()
     const webmasters = google.webmasters({
       version: 'v3',
-      auth
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      auth: authClient as any
     })
     
     const response = await webmasters.searchanalytics.query({
@@ -233,6 +239,7 @@ export async function getTopQueriesForPage(
 
     const rows = response.data.rows || []
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return rows.map((row: any) => ({
       query: row.keys[0],
       clicks: row.clicks || 0,

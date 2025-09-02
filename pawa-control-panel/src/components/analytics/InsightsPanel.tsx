@@ -15,7 +15,6 @@ import {
   Award,
   BarChart3,
   Lightbulb,
-  ExternalLink,
   RefreshCw
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -64,12 +63,6 @@ const getPriorityColor = (priority: InsightPriority) => {
   }
 }
 
-const getScoreColor = (score: number) => {
-  if (score >= 80) return 'text-green-600 bg-green-50 border-green-200'
-  if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-  if (score >= 40) return 'text-orange-600 bg-orange-50 border-orange-200'
-  return 'text-red-600 bg-red-50 border-red-200'
-}
 
 const getScoreIcon = (score: number) => {
   if (score >= 80) return <Award className="h-4 w-4" />

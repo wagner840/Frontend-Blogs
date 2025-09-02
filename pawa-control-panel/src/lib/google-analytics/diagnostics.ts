@@ -26,11 +26,13 @@ export async function diagnoseGA4Connection(propertyId: string): Promise<Diagnos
     
     // Test 1: Check if property exists and we have access
     try {
-      const [metadataResponse] = await client.getMetadata({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [_metadataResponse] = await client.getMetadata({
         name: `properties/${propertyId}/metadata`
       })
       result.propertyName = `Property ${propertyId}` // GA4 API doesn't return name in metadata
-    } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_error) {
       result.errors.push(`Cannot access property ${propertyId}. Check if property ID is correct and service account has access.`)
       result.suggestions.push('Verify property ID in Google Analytics Admin > Property Settings')
       result.suggestions.push('Add service account as Viewer in Google Analytics Admin > Property Settings > Property Access Management')

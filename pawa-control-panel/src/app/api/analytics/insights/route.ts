@@ -13,10 +13,6 @@ import type { DateRange } from '@/lib/google-analytics/types'
 // Cache duration in seconds (30 minutes for insights - shorter than regular analytics)
 const CACHE_DURATION = 1800
 
-interface InsightsParams {
-  searchParams: URLSearchParams
-}
-
 export async function GET(request: NextRequest) {
   try {
     // Validate configuration first

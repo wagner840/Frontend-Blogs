@@ -7,6 +7,23 @@ import type { DateRange } from '@/lib/google-analytics/types'
 // Cache duration in seconds (2 hours for Search Console data)
 const CACHE_DURATION = 7200
 
+// Type definitions
+interface KeywordData {
+  clicks: number
+  impressions: number
+  ctr: number
+  position: number
+  query?: string
+  term?: string
+}
+
+interface SummaryData {
+  totalClicks: number
+  totalImpressions: number
+  averageCTR: number
+  averagePosition: number
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -45,10 +62,10 @@ export async function GET(request: NextRequest) {
           period,
           dateRange,
           summary: {
-            totalClicks: optemilData.summary.totalClicks + einsof7Data.summary.totalClicks,
-            totalImpressions: optemilData.summary.totalImpressions + einsof7Data.summary.totalImpressions,
-            averageCTR: calculateWeightedCTR([optemilData.summary, einsof7Data.summary]),
-            averagePosition: calculateWeightedPosition([optemilData.summary, einsof7Data.summary]),
+            totalClicks: (optemilData.summary as unknown as SummaryData).totalClicks + (einsof7Data.summary as unknown as SummaryData).totalClicks,
+            totalImpressions: (optemilData.summary as unknown as SummaryData).totalImpressions + (einsof7Data.summary as unknown as SummaryData).totalImpressions,
+            averageCTR: calculateWeightedCTR([optemilData.summary as unknown as SummaryData, einsof7Data.summary as unknown as SummaryData]),
+            averagePosition: calculateWeightedPosition([optemilData.summary as unknown as SummaryData, einsof7Data.summary as unknown as SummaryData]),
             blogs: [
               {
                 id: 'optemil',
@@ -62,11 +79,11 @@ export async function GET(request: NextRequest) {
               }
             ]
           },
-          topKeywords: combineAndSortKeywords([optemilData.topKeywords, einsof7Data.topKeywords]),
+          topKeywords: combineAndSortKeywords([optemilData.topKeywords as unknown as KeywordData[], einsof7Data.topKeywords as unknown as KeywordData[]]),
           topPages: combineAndSortPages([optemilData.topPages, einsof7Data.topPages]),
           ...(includeBreakdowns && {
-            deviceBreakdown: combineBreakdowns([optemilData.deviceBreakdown, einsof7Data.deviceBreakdown]),
-            countryBreakdown: combineBreakdowns([optemilData.countryBreakdown, einsof7Data.countryBreakdown])
+            deviceBreakdown: combineBreakdowns([optemilData.deviceBreakdown || [], einsof7Data.deviceBreakdown || []]),
+            countryBreakdown: combineBreakdowns([optemilData.countryBreakdown || [], einsof7Data.countryBreakdown || []])
           })
         }
       } else {
@@ -133,14 +150,15 @@ async function fetchBlogSearchConsoleData(
   const topKeywords = await getKeywordsByBlog(blog, dateRange, 20)
 
   // Calculate summary metrics from keywords
+  const keywordsData = topKeywords as unknown as KeywordData[]
   const summary = {
-    totalClicks: topKeywords.reduce((sum: number, k: any) => sum + k.clicks, 0),
-    totalImpressions: topKeywords.reduce((sum: number, k: any) => sum + k.impressions, 0),
-    averageCTR: topKeywords.length > 0 
-      ? Math.round((topKeywords.reduce((sum: number, k: any) => sum + k.ctr, 0) / topKeywords.length) * 100) / 100
+    totalClicks: keywordsData.reduce((sum: number, k: KeywordData) => sum + k.clicks, 0),
+    totalImpressions: keywordsData.reduce((sum: number, k: KeywordData) => sum + k.impressions, 0),
+    averageCTR: keywordsData.length > 0 
+      ? Math.round((keywordsData.reduce((sum: number, k: KeywordData) => sum + k.ctr, 0) / keywordsData.length) * 100) / 100
       : 0,
-    averagePosition: topKeywords.length > 0
-      ? Math.round((topKeywords.reduce((sum: number, k: any) => sum + k.position, 0) / topKeywords.length) * 10) / 10
+    averagePosition: keywordsData.length > 0
+      ? Math.round((keywordsData.reduce((sum: number, k: KeywordData) => sum + k.position, 0) / keywordsData.length) * 10) / 10
       : 0
   }
 
@@ -174,13 +192,13 @@ function convertPeriodToDateRange(period: string): DateRange {
 }
 
 // Helper functions for combining data
-function calculateWeightedCTR(summaries: any[]) {
+function calculateWeightedCTR(summaries: SummaryData[]) {
   const totalClicks = summaries.reduce((sum, s) => sum + s.totalClicks, 0)
   const totalImpressions = summaries.reduce((sum, s) => sum + s.totalImpressions, 0)
   return totalImpressions > 0 ? Math.round((totalClicks / totalImpressions) * 10000) / 100 : 0
 }
 
-function calculateWeightedPosition(summaries: any[]) {
+function calculateWeightedPosition(summaries: SummaryData[]) {
   const totalImpressions = summaries.reduce((sum, s) => sum + s.totalImpressions, 0)
   if (totalImpressions === 0) return 0
   
@@ -188,7 +206,7 @@ function calculateWeightedPosition(summaries: any[]) {
   return Math.round((weightedSum / totalImpressions) * 10) / 10
 }
 
-function combineAndSortKeywords(keywordSets: any[]) {
+function combineAndSortKeywords(keywordSets: KeywordData[][]) {
   const combined = keywordSets.flat()
   const keywordMap = new Map()
 
@@ -210,20 +228,22 @@ function combineAndSortKeywords(keywordSets: any[]) {
     .slice(0, 20)
 }
 
-function combineAndSortPages(pageSets: any[]) {
+function combineAndSortPages(pageSets: unknown[][]) {
   const combined = pageSets.flat()
   const pageMap = new Map()
 
   combined.forEach(page => {
-    const key = page.page
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = page as any
+    const key = p.page
     if (pageMap.has(key)) {
       const existing = pageMap.get(key)
-      existing.clicks += page.clicks
-      existing.impressions += page.impressions
+      existing.clicks += p.clicks
+      existing.impressions += p.impressions
       existing.ctr = existing.impressions > 0 ? (existing.clicks / existing.impressions) * 100 : 0
-      existing.position = (existing.position + page.position) / 2
+      existing.position = (existing.position + p.position) / 2
     } else {
-      pageMap.set(key, { ...page })
+      pageMap.set(key, { ...p })
     }
   })
 
@@ -232,20 +252,22 @@ function combineAndSortPages(pageSets: any[]) {
     .slice(0, 15)
 }
 
-function combineBreakdowns(breakdownSets: any[]) {
+function combineBreakdowns(breakdownSets: unknown[][]) {
   const combined = breakdownSets.flat()
   const breakdownMap = new Map()
 
   combined.forEach(item => {
-    const key = item.device || item.country
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const i = item as any
+    const key = i.device || i.country
     if (breakdownMap.has(key)) {
       const existing = breakdownMap.get(key)
-      existing.clicks += item.clicks
-      existing.impressions += item.impressions
+      existing.clicks += i.clicks
+      existing.impressions += i.impressions
       existing.ctr = existing.impressions > 0 ? (existing.clicks / existing.impressions) * 100 : 0
-      existing.position = (existing.position + item.position) / 2
+      existing.position = (existing.position + i.position) / 2
     } else {
-      breakdownMap.set(key, { ...item })
+      breakdownMap.set(key, { ...i })
     }
   })
 

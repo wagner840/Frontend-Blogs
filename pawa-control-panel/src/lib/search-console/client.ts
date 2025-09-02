@@ -69,6 +69,7 @@ export interface IndexingStatus {
 }
 
 export class SearchConsoleClient {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private webmasters: any
   private initialized = false
 
@@ -84,7 +85,8 @@ export class SearchConsoleClient {
       const authClient = await gaAuth.getClient()
       this.webmasters = google.webmasters({
         version: 'v3',
-        auth: authClient
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        auth: authClient as any
       })
       this.initialized = true
       console.log('✅ Search Console Client initialized successfully')
@@ -132,6 +134,7 @@ export class SearchConsoleClient {
       let totalCTR = 0
       let totalPosition = 0
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       rows.forEach((row: any) => {
         const clicks = row.clicks || 0
         const impressions = row.impressions || 0
@@ -201,6 +204,7 @@ export class SearchConsoleClient {
 
       const sitemaps = response.data.sitemap || []
       
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return sitemaps.map((sitemap: any) => ({
         path: sitemap.path,
         lastSubmitted: sitemap.lastSubmitted || null,

@@ -294,7 +294,8 @@ function generateCategoryBreakdown(
 function generateContentInsights(
   allContent: ContentPerformanceData[],
   topPerformers: ContentPerformanceData[],
-  underPerformers: ContentPerformanceData[]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _underPerformers: ContentPerformanceData[]
 ): ContentInsight[] {
   const insights: ContentInsight[] = []
 

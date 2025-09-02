@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactElement, useState, useEffect } from 'react'
+import { ReactElement, useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,9 +34,7 @@ import { MetricTooltip } from '@/components/ui/contextual-tooltip'
 import type { 
   Insight, 
   Recommendation, 
-  TrendDirection,
-  InsightPriority,
-  InsightType 
+  TrendDirection
 } from '@/components/analytics/InsightCard'
 import type { 
   PerformanceScore, 
@@ -179,13 +177,8 @@ export default function EnhancedAnalyticsPage(): ReactElement {
     fetchAnalyticsData()
   }, [selectedBlog])
 
-  // Fetch enhanced insights data
-  useEffect(() => {
-    fetchInsightsData()
-  }, [analyticsData, selectedBlog])
-
   // Fetch enhanced insights data function
-  const fetchInsightsData = async () => {
+  const fetchInsightsData = useCallback(async () => {
     if (!analyticsData) return
     
     setInsightsLoading(true)
@@ -211,7 +204,12 @@ export default function EnhancedAnalyticsPage(): ReactElement {
     } finally {
       setInsightsLoading(false)
     }
-  }
+  }, [analyticsData, selectedBlog])
+
+  // Fetch enhanced insights data
+  useEffect(() => {
+    fetchInsightsData()
+  }, [fetchInsightsData])
 
   const refreshInsights = async () => {
     await fetchInsightsData()

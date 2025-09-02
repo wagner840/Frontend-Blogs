@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactElement, useState, useEffect } from 'react'
+import { ReactElement, useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -34,9 +34,7 @@ import { MetricTooltip } from '@/components/ui/contextual-tooltip'
 import type { 
   Insight, 
   Recommendation, 
-  TrendDirection,
-  InsightPriority,
-  InsightType 
+  TrendDirection
 } from '@/components/analytics/InsightCard'
 import type { 
   PerformanceScore, 
@@ -179,41 +177,41 @@ export default function EnhancedAnalyticsPage(): ReactElement {
     fetchAnalyticsData()
   }, [selectedBlog])
 
-  // Fetch enhanced insights data
-  useEffect(() => {
-    async function fetchInsightsData() {
-      if (!analyticsData) return
+  // Fetch enhanced insights data function
+  const fetchInsightsData = useCallback(async () => {
+    if (!analyticsData) return
+    
+    setInsightsLoading(true)
+    
+    try {
+      const response = await fetch(`/api/analytics/insights?blog=${selectedBlog}`)
       
-      setInsightsLoading(true)
-      
-      try {
-        const response = await fetch(`/api/analytics/insights?blog=${selectedBlog}`)
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-        
-        const result: InsightsAPIResponse = await response.json()
-        
-        if (result.success && result.data) {
-          setInsightsData(result.data)
-        } else {
-          throw new Error('Failed to load insights data')
-        }
-        
-      } catch (err) {
-        console.error('Failed to fetch insights data:', err)
-        // Don't show error for insights - just continue without them
-      } finally {
-        setInsightsLoading(false)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
+      
+      const result: InsightsAPIResponse = await response.json()
+      
+      if (result.success && result.data) {
+        setInsightsData(result.data)
+      } else {
+        throw new Error('Failed to load insights data')
+      }
+      
+    } catch (err) {
+      console.error('Failed to fetch insights data:', err)
+      // Don't show error for insights - just continue without them
+    } finally {
+      setInsightsLoading(false)
     }
-
-    fetchInsightsData()
   }, [analyticsData, selectedBlog])
 
+  // Fetch enhanced insights data
+  useEffect(() => {
+    fetchInsightsData()
+  }, [fetchInsightsData])
+
   const refreshInsights = async () => {
-    if (!analyticsData) return
     await fetchInsightsData()
   }
 

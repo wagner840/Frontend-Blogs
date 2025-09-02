@@ -1,5 +1,5 @@
-import { AnalyticsOverview, BlogAnalyticsData, TrafficSource, Keyword } from '@/lib/google-analytics/types'
-import { Insight, Recommendation, InsightPriority, InsightType } from '@/components/analytics/InsightCard'
+import { AnalyticsOverview, TrafficSource, Keyword } from '@/lib/google-analytics/types'
+import { Insight, Recommendation } from '@/components/analytics/InsightCard'
 
 export interface PerformanceScore {
   overall: number // 0-100
@@ -66,7 +66,8 @@ export class InsightsEngine {
    */
   static analyzeMetrics(
     data: AnalyticsOverview,
-    historical: HistoricalDataPoint[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _historical: HistoricalDataPoint[] = [],
     trafficSources: TrafficSource[] = [],
     keywords: Keyword[] = []
   ): Insight[] {

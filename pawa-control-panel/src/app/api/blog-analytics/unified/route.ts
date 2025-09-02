@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDetailedTrafficBreakdown, getTrafficMediumBreakdown } from '@/lib/google-analytics/queries/ga4-traffic-detailed'
+import { getDetailedTrafficBreakdown } from '@/lib/google-analytics/queries/ga4-traffic-detailed'
 import { getContentPerformanceAnalysis } from '@/lib/google-analytics/queries/content-analysis'
 import { getKeywordsByBlog } from '@/lib/google-search-console/queries'
 import { getPropertyId, validateGAConfig } from '@/lib/google-analytics/config'
@@ -172,31 +172,35 @@ function convertPeriodToDateRange(period: string): DateRange {
 }
 
 // Helper function to combine traffic breakdowns
-function combineTrafficBreakdowns(breakdowns: any[]) {
+function combineTrafficBreakdowns(breakdowns: unknown[]) {
   const combined = {
     totalSessions: 0,
-    breakdown: [] as any[],
-    insights: [] as any[]
+    breakdown: [] as unknown[],
+    insights: [] as unknown[]
   }
 
   // Sum total sessions
-  combined.totalSessions = breakdowns.reduce((sum, b) => sum + b.totalSessions, 0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  combined.totalSessions = breakdowns.reduce((sum, b) => sum + (b as any).totalSessions, 0) as number
 
   // Combine breakdown data by medium
   const mediumMap = new Map()
   
   breakdowns.forEach(breakdown => {
-    breakdown.breakdown.forEach((item: any) => {
-      const key = `${item.medium}_${item.source}`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (breakdown as any).breakdown.forEach((item: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const i = item as any
+      const key = `${i.medium}_${i.source}`
       if (mediumMap.has(key)) {
         const existing = mediumMap.get(key)
-        existing.sessions += item.sessions
-        existing.keyEvents += item.keyEvents
+        existing.sessions += i.sessions
+        existing.keyEvents += i.keyEvents
         // Recalculate weighted averages
-        existing.bounceRate = (existing.bounceRate + item.bounceRate) / 2
-        existing.engagementRate = (existing.engagementRate + item.engagementRate) / 2
+        existing.bounceRate = (existing.bounceRate + i.bounceRate) / 2
+        existing.engagementRate = (existing.engagementRate + i.engagementRate) / 2
       } else {
-        mediumMap.set(key, { ...item })
+        mediumMap.set(key, { ...i })
       }
     })
   })
@@ -204,33 +208,42 @@ function combineTrafficBreakdowns(breakdowns: any[]) {
   combined.breakdown = Array.from(mediumMap.values())
   
   // Recalculate percentages
-  combined.breakdown.forEach((item: any) => {
-    item.percentageOfTotal = Math.round((item.sessions / combined.totalSessions) * 1000) / 10
+  combined.breakdown.forEach((item: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (item as any).percentageOfTotal = Math.round(((item as any).sessions / combined.totalSessions) * 1000) / 10
   })
 
   // Combine insights
-  combined.insights = breakdowns.flatMap(b => b.insights)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  combined.insights = breakdowns.flatMap(b => (b as any).insights)
 
   return combined
 }
 
 // Helper function to combine content performance
-function combineContentPerformance(performances: any[]) {
+function combineContentPerformance(performances: unknown[]) {
   return {
-    totalPageViews: performances.reduce((sum, p) => sum + p.totalPageViews, 0),
-    topPerformers: performances.flatMap(p => p.topPerformers)
-      .sort((a, b) => b.pageViews - a.pageViews)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    totalPageViews: performances.reduce((sum, p) => sum + (p as any).totalPageViews, 0),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    topPerformers: performances.flatMap(p => (p as any).topPerformers)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort((a: any, b: any) => b.pageViews - a.pageViews)
       .slice(0, 10),
-    underPerformers: performances.flatMap(p => p.underPerformers)
-      .sort((a, b) => a.engagementRate - b.engagementRate)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    underPerformers: performances.flatMap(p => (p as any).underPerformers)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort((a: any, b: any) => a.engagementRate - b.engagementRate)
       .slice(0, 5),
-    insights: performances.flatMap(p => p.insights)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    insights: performances.flatMap(p => (p as any).insights)
   }
 }
 
 // Helper function to combine keywords
-function combineKeywords(keywordSets: any[]) {
+function combineKeywords(keywordSets: unknown[]) {
   return keywordSets.flat()
-    .sort((a, b) => b.impressions - a.impressions)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .sort((a: any, b: any) => b.impressions - a.impressions)
     .slice(0, 15)
 }

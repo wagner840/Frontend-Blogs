@@ -306,12 +306,11 @@ ProgressiveSection.displayName = 'ProgressiveSection'
 
 // Helper component for nested progressive sections
 export interface NestedProgressiveSectionProps extends Omit<ProgressiveSectionProps, 'showBreadcrumbs' | 'breadcrumbs'> {
-  parentLevel?: ComplexityLevel
   depth?: number
 }
 
 const NestedProgressiveSection = React.forwardRef<HTMLDivElement, NestedProgressiveSectionProps>(
-  ({ parentLevel, depth = 1, className, ...props }, ref) => {
+  ({ depth = 1, className, ...props }, ref) => {
     const nestedClassName = cn(
       'ml-4 border-l-2 border-muted',
       depth > 1 && 'ml-6',

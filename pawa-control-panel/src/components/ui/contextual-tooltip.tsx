@@ -66,7 +66,8 @@ const ContextualTooltip = React.forwardRef<
 }, ref) => {
   const arrowRef = React.useRef(null)
   
-  const { refs, floatingStyles, context } = useFloating({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { refs: _refs, floatingStyles, context: _context } = useFloating({
     placement: position,
     middleware: [
       offset(8),

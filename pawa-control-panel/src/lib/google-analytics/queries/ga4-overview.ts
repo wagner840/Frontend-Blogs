@@ -32,8 +32,8 @@ export async function getGA4OverviewMetrics(
       { startDate: '2023-01-01', endDate: '2023-12-31' }, // All of 2023
     ]
 
-    let currentResponse: any = null
-    let usedRange: DateRange = dateRange
+    let currentResponse: unknown = null
+    // let usedRange: DateRange = dateRange // Range tracking not needed
 
     // Try each date range until we find data
     for (const range of fallbackRanges) {
@@ -55,7 +55,7 @@ export async function getGA4OverviewMetrics(
         if (response.rows && response.rows.length > 0 && response.rows[0]?.metricValues) {
           console.log(`✅ Found data in range: ${range.startDate} to ${range.endDate}`)
           currentResponse = response
-          usedRange = range
+          // usedRange = range // Range is logged above
           break
         } else {
           console.log(`❌ No data in range: ${range.startDate} to ${range.endDate}`)
@@ -67,12 +67,13 @@ export async function getGA4OverviewMetrics(
     }
 
     // If no data found in any range, throw error
-    if (!currentResponse?.rows?.[0]?.metricValues) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!(currentResponse as any)?.rows?.[0]?.metricValues) {
       throw new Error(`No data returned from GA4 for property ${propertyId} in any date range. Check if analytics is properly configured and receiving data.`)
     }
 
     // Try to get previous period for comparison
-    let previousResponse: any = null
+    let previousResponse: unknown = null
     try {
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - 60) // 60 days ago
@@ -98,7 +99,8 @@ export async function getGA4OverviewMetrics(
     }
 
     // Extract current data
-    const currentRow = currentResponse.rows[0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const currentRow = (currentResponse as any).rows[0]
     const currentUsers = parseInt(currentRow.metricValues[0].value || '0')
     const currentPageViews = parseInt(currentRow.metricValues[1].value || '0')
     const currentSessions = parseInt(currentRow.metricValues[2].value || '0')
@@ -106,7 +108,8 @@ export async function getGA4OverviewMetrics(
     const bounceRate = parseFloat(currentRow.metricValues[4].value || '0') * 100 // GA4 returns as decimal
 
     // Extract previous data for comparison
-    const previousRow = previousResponse?.rows?.[0]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const previousRow = (previousResponse as any)?.rows?.[0]
     const previousUsers = parseInt(previousRow?.metricValues?.[0]?.value || '0')
 
     // Return the formatted data
