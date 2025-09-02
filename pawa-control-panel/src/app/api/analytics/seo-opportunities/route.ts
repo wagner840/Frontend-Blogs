@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
+
 import { findSEOOpportunities } from '@/lib/search-console/queries/seo-opportunities'
 import type { DateRange } from '@/lib/google-analytics/types'
 

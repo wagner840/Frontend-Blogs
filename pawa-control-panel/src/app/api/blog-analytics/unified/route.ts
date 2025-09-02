@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { getDetailedTrafficBreakdown } from '@/lib/google-analytics/queries/ga4-traffic-detailed'
 import { getContentPerformanceAnalysis } from '@/lib/google-analytics/queries/content-analysis'
 import { getKeywordsByBlog } from '@/lib/google-search-console/queries'
